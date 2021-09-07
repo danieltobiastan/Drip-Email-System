@@ -5,7 +5,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 # use creds to create a client to interact with the Google Drive API
 scope = ['https://spreadsheets.google.com/feeds',
 'https://www.googleapis.com/auth/drive']
-creds = ServiceAccountCredentials.from_json_keyfile_name('/Users/daniel/projects/dripconfig/drip-config.json', scope)
+creds = ServiceAccountCredentials.from_json_keyfile_name('drip-config.json', scope)
 client = gspread.authorize(creds)
 
 # Find a workbook by name and open the first sheet
