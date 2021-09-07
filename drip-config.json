@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "drip-config",
+  "private_key_id": "0aa98a46688ea2f0038ec911119bc18c0fab73cc",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDTJz7tH76+WhNU\nc5Yu4KauA033m86P3FQWQOHN/VZdOUSv8lZvXeJkkZ6rcFRxQipbQJo9c7+aDbwo\ngayCp1glLhznrsCTWR8PL8YjQF3S9ENL6AyHEi1rSRSPXt5RpekRhVcKdMb1Fl35\nF1CGHEK1a4Ovdmr3CBE5HLgTrgrwWpkI859p+pSC6Tlgf2DBZggb5ROrHa+EZlag\nAkQyksvzXhZUCaDBCl9JTnGlN7R3s9fzPww2jnODT01IgsXRYP5hXIeEXCc8K239\nnH2I18fZ9R9L4sycSMOyYzxpTfsvniiu0wFrpnUAbv6si78/fapdSMyCl1OYaCMH\nzv3khm9RAgMBAAECggEAOSz9WxQngD+/0DRkTFlEiQYYDJ5B9q6Ajm4PNsoMor2p\nHcOPKCTR8s2Dm4SVOP3jnkYF/fHjxgFGG+nRHqfVtGuiJBIrzzposKINEuqQ/Vhr\nCJjTG5gOeGiXiqLzrEQysi3a/dfVL/RYieSIR2hLn/h29gIowK+Milx+c8XC7IX9\niouMJfLIbA+26AF1+KF2FtJZXpsaKL9+OjQPUtRe9SUdb0ks8MQc1OsZkDKMq9v0\nMpcCYxCB31A8+8dhVHOxxeXvVFhj5+sye6j7Z7iHGAFqL/5Pa8QNbhOD0pQj8kmt\nCJVGVjd7CzUbdPb/AYA3+y2mktz0kASs2Aro/rQgiQKBgQD40sGEbKQaxTgO687P\niQyr5vzO96SqCKhqVVnYT5RiajWRgDEw9w+evslQ8ZF/8+L80TlzA6MiRdZsQiNj\nGC1ZvLlLrzw0bAHwK+IPLlBH4obuUUmwnN2NGlM703wT7i7KoVIVhMfbMdGmIgkC\nW70l/UmQDw5V2l09Gd4iU6EPHwKBgQDZPlhS4eLy0aBjnWTcb1HKamRMa2ULi1sI\n2+viG4wa+tx8kffwd8QkUuUq7OOeGxNbqKedYZ3z6GqJFcYq9K3MJZRbgevAm2Br\nSL+qrBCXPfcW2RC8htsNtZ8qTaJDBro/PEvhCDl+ciSmcHOBMEcPN6r22pmICvFo\n573GgopjjwKBgQCJEllG4S56DOE33xF75KzVWhc00NmmTcSxZzlqX1SH7qh58hun\nNMMnGUT/0UPtL+aAjaXPRVat/7kCxGCIK354K+4L0oog+ssKirIq2MGjCBh62s70\ne0XVgIYPtA5rUE/4kmwMrKwIhWZP1foOkYkej2zh7llgVD3+9ewYDufv0wKBgQCI\nJXpU9xuz8YwC4fED9P/dSy/wdJ2uzncO5kS+P2VewzjLGO+51FUoLotQi4Va4L0R\nBHGHQFYtNcsOfobjBNSmzCZd8t48pyOWGNGFtK/xGPRxbTf/7sP5o4lMibrXJrAy\nUSd8sBrYE9DEPlUk8YyXDNwoOHdfuvvwMsvMTKNOIQKBgQCi0rtEz6M/o/A9JA24\njMADb3LIqQX2RIFS46d3MwLPlv8To5Tk1IlhohXtxhV4YH5O9h0W1pkU+lUy0aZ+\njuhsJmnYd/MUvKHJbtUbuStmomXdbSBc7/wtTrzgie2jQQhm53QNfqQh+hmfSLj6\nlHbkB9+QRAzmEI2zDUQ2jHmcmg==\n-----END PRIVATE KEY-----\n",
+  "client_email": "danieldrip@drip-config.iam.gserviceaccount.com",
+  "client_id": "107802370062530314137",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/danieldrip%40drip-config.iam.gserviceaccount.com"
+}
