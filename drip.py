@@ -1,25 +1,42 @@
 import gspread
-from oauth2client.service_account import ServiceAccountCredentials
+
+""" Obtains data from the spreadsheet """
 
 
-# use creds to create a client to interact with the Google Drive API
-scope = ['https://spreadsheets.google.com/feeds',
-'https://www.googleapis.com/auth/drive']
-creds = ServiceAccountCredentials.from_json_keyfile_name('drip-config.json', scope)
-client = gspread.authorize(creds)
+def retrieve_data(spreadsheet_object, index):
+    worksheet = spreadsheet_object.worksheets()
+    return worksheet[index].get_all_values()
 
-# Find a workbook by name and open the first sheet
-# Make sure you use the right name here.
-sheet = client.open("Python of Drip Config (UWA 3)").sheet1
 
-# Extract and print first row of the values
-list_of_hashes = sheet.row_values(1)
-print(list_of_hashes)
+""" Sort out the campaigns with the templates """
 
-#update a cell
-sheet.update_cell(6, 2, "Daniel")
-sheet.update_cell(6, 3, "Tan")
-sheet.update_cell(6, 4, "UWA")
-sheet.update_cell(6, 5, "Creator")
-list_of_hashes = sheet.row_values(6)
-print(list_of_hashes)
+
+def campaign(campaign_data, template_data):
+    print(campaign_data)
+
+    # Turn list of list into list dictionary for each email template
+    flat_template_data = [item for sublist in template_data for item in sublist]
+    iteration = iter(flat_template_data)
+    templates = dict(zip(iteration, iteration))
+
+    print(dict(zip(iteration, iteration)))
+
+
+def main():
+    # Authenticate the service account using jwt stored in drip-config.py
+    gc = gspread.service_account(filename="drip-config.json")
+
+    # Index the spreadsheet with the name
+    sh = gc.open("Python of Drip Config (UWA 3)")
+
+    # [CONTACTS, CAMPAIGNS, TEMPLATES, ALL, ProUser, Support, UNSUBSCRIBE, LOG, Emails]
+    # Retrieve all data
+
+    campaign_data = retrieve_data(sh, 1)
+    template_data = retrieve_data(sh, 2)
+
+    campaign(campaign_data, template_data)
+
+
+if __name__ == "__main__":
+    main()
