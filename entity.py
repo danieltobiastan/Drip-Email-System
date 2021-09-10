@@ -31,6 +31,9 @@ class Campaign:
     def get_people(self):
         return self.people
 
+    def get_name(self):
+        return self.name
+
     def add_people(self, list_of_people):
         if type(list_of_people) is list:
             self.people.extend(list_of_people)
