@@ -1,3 +1,6 @@
+""" People class to store information about each person """
+
+
 class People:
     def __init__(self, email, first_name, last_name, organisation, role, tag):
         self.email = email
@@ -21,6 +24,9 @@ class People:
 
     def get_tag(self):
         return self.tag
+
+
+""" Campaign class to store information about each campaign """
 
 
 class Campaign:
@@ -48,31 +54,33 @@ class Campaign:
             self.people.remove(list_of_people)
 
 
-person1 = People("aixxmtg@charter.gov", "Paul", "Beal", "Twillio", "CEO", "Support")
-person2 = People("h98@comcast.net", "Mary", "Fitz", "Curtin University", "researcher", "Pro")
-person3 = People("22764884@student.uwa.edu.au", "Sam", "Tink", "Google", "CFO", "Support")
-
-person4 = People("h98@comcast.net", "Mary", "Fitz", "Curtin University", "researcher", "Pro")
-person5 = People("22764884@student.uwa.edu.au", "Sam", "Tink", "Google", "CFO", "Support")
-
-
-pro = [person1, person2, person3, person4, person5]
-pro.remove(person4)
-people2 = [person4]
-people3 = [person5]
-people = [
-    person1,
-    person2,
-    person3,
-]
-
-pro_campaigns = Campaign("Pro")
-pro_campaigns.add_people(people)
-pro_campaigns.add_people(people2)
-pro_campaigns.add_people(people3)
-
-# print(pro_campaigns.get_people())
-pro_people = pro_campaigns.get_people()
-
-pro_campaigns.remove_people(person4)
-# print(pro_campaigns.get_people())
+"""" Testing functionality with dummy data """
+# person1 = People("aixxmtg@charter.gov", "Paul", "Beal", "Twillio", "CEO", "Support")
+# person2 = People("h98@comcast.net", "Mary", "Fitz", "Curtin University", "researcher", "Pro")
+# person3 = People("22764884@student.uwa.edu.au", "Sam", "Tink", "Google", "CFO", "Support")
+#
+# person4 = People("h98@comcast.net", "Mary", "Fitz", "Curtin University", "researcher", "Pro")
+# person5 = People("22764884@student.uwa.edu.au", "Sam", "Tink", "Google", "CFO", "Support")
+#
+#
+# pro = [person1, person2, person3, person4, person5]
+# pro.remove(person4)
+# people2 = [person4]
+# people3 = [person5]
+# people = [
+#     person1,
+#     person2,
+#     person3,
+# ]
+#
+# print(person1.get_fullname())
+# pro_campaigns = Campaign("Pro")
+# pro_campaigns.add_people(people)
+# pro_campaigns.add_people(people2)
+# pro_campaigns.add_people(people3)
+#
+# # print(pro_campaigns.get_people())
+# pro_people = pro_campaigns.get_people()
+#
+# pro_campaigns.remove_people(person4)
+# # print(pro_campaigns.get_people())
