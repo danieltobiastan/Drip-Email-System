@@ -8,11 +8,6 @@ RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 COPY . /Drip-Email-System
 WORKDIR /Drip-Email-System
 
-# Run these commands to set up SENDGRID
-RUN echo "export SENDGRID_API_KEY='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'" > sendgrid.env
-RUN echo "sendgrid.env" >> .gitignore
-RUN source ./sendgrid.env
-
 #Not sure if necessary
 #RUN useradd -ms /bin/bash newuser
 #USER newuser
