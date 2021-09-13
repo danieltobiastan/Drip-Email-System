@@ -1,4 +1,5 @@
 """ People class to store information about each person """
+import numpy as np
 
 
 class People:
@@ -9,6 +10,7 @@ class People:
         self.organisation = organisation
         self.role = role
         self.tag = tag
+        self.date = np.datetime64('now')
 
     def get_fullname(self):
         return self.first_name + " " + self.last_name
@@ -24,6 +26,9 @@ class People:
 
     def get_tag(self):
         return self.tag
+
+    def get_date(self):
+        return self.date
 
 
 """ Campaign class to store information about each campaign """
@@ -48,7 +53,7 @@ class Campaign:
 
     def remove_people(self, list_of_people):
         if type(list_of_people) is list:
-            for person in people:
+            for person in list_of_people:
                 self.people.remove(person)
         else:
             self.people.remove(list_of_people)

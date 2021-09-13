@@ -1,8 +1,9 @@
 import gspread
-import numpy
+import numpy as np
 from entity import People, Campaign
+from timeit import default_timer as timer
 
-# import sendemail
+# import send_email
 
 """ Obtains data from the spreadsheet """
 
@@ -21,18 +22,32 @@ def retrieve_data(spreadsheet_object, types):
         return worksheet[types].get_all_values()
 
 
-""" Sort the campaigns with the templates """
+""" Sort the templates and returns a dictionary {name: id}"""
 
 
-def campaign(campaign_data, template_data):
-    print(campaign_data)
-
+def template(template_data):
     # Turn list of list into  dictionary for each email template
     flat_template_data = [item for sublist in template_data for item in sublist]
     iteration = iter(flat_template_data)
     templates = dict(zip(iteration, iteration))
-
     print(templates)
+
+
+""" Create new campaigns also using list comprehension and placing then into numpy array
+    Check and set email for next email to be sent
+"""
+
+
+def campaigns(sh, names, number):
+    # Create new campaigns also using list comprehension and placing then into numpy array
+    array_of_campaigns = np.array([Campaign(name) for name in names])
+    for i in range(number):
+        people_in_campaign = retrieve_data(sh, i + 5)[1:]
+        people_in_campaign = [
+            People(person[0], person[1], person[2], person[3], person[4], person[5]) for person in people_in_campaign
+        ]
+        array_of_campaigns[i].add_people(people_in_campaign)
+    return array_of_campaigns
 
 
 """ Sort the people with the campaigns, organisation, roles, names and emails """
@@ -44,6 +59,7 @@ def people(all_people, extra_campaigns_list):
 
 
 def main():
+    start = timer()
     # Authenticate the service account using jwt stored in drip-config.py
     gc = gspread.service_account(filename="drip-config.json")
 
@@ -59,21 +75,13 @@ def main():
     template_data = retrieve_data(sh, 2)
     all_people = retrieve_data(sh, 5)[1:]  # read everything after row 1
 
-    # Create people object
-    for i in range(len(all_people)):
-        all_people[i] = People(
-            all_people[i][0], all_people[i][1], all_people[i][2], all_people[i][3], all_people[i][4], all_people[i][5]
-        )
+    array_of_campaigns = campaigns(sh, name_of_campaigns, number_of_campaigns)
+    # print(array_of_campaigns)
 
-    # Create new campaigns
-    array_of_campaigns = []
-    for i in range(number_of_campaigns):
-        array_of_campaigns.append(Campaign(name_of_campaigns[i]))
-
-    # convert the list of list into numpy array for better indexing and less memory usage
-    all_people = numpy.array(all_people)
-
-    # campaign(campaign_data, template_data)
+    # template(template_data)
+    print(array_of_campaigns[0].get_people()[0].get_date())
+    end = timer()
+    print("it takes " + str((end - start)) + " seconds")
 
 
 if __name__ == "__main__":

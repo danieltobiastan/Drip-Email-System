@@ -1,3 +1,4 @@
 gspread~=4.0.0
 sendgrid~=6.8.1
 numpy~=1.21.2
+python-dotenv~=0.15.0
