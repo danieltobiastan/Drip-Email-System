@@ -1,15 +1,27 @@
 import gspread
 import numpy as np
 from entity import People, Campaign
-from timeit import default_timer as timer
+# from timeit import default_timer as timer
 
 # import send_email
 
-""" Obtains data from the spreadsheet """
+""" 
+Obtains data from the spreadsheet based on parameter
+
+:param gspread.models.Spreadsheet sso: spread sheet object from gspread
+:param types: the required data
+
+* Not sure how to do different returns comments
+:return
+- types = 'name' : name of all the possible worksheet
+- types = 'len' : total number of worksheets
+- types = 'index of sheet' : all the data of that sheet in list
+"""
 
 
-def retrieve_data(spreadsheet_object, types):
-    worksheet = spreadsheet_object.worksheets()
+def retrieve_data(sso, types):
+    print(type(sso))
+    worksheet = sso.worksheets()
     length = len(worksheet)
     if types == "name":  # If type is name return list of sheet names
         names = []
@@ -22,7 +34,13 @@ def retrieve_data(spreadsheet_object, types):
         return worksheet[types].get_all_values()
 
 
-""" Sort the templates and returns a dictionary {name: id}"""
+""" 
+Sort the templates and returns a dictionary
+
+:param str template_data: the data read from sheet
+
+:return dict templates: the dictionary in the form of {template name: sendGrid template id}
+"""
 
 
 def template(template_data):
@@ -30,11 +48,18 @@ def template(template_data):
     flat_template_data = [item for sublist in template_data for item in sublist]
     iteration = iter(flat_template_data)
     templates = dict(zip(iteration, iteration))
-    print(templates)
+    return templates
 
 
-""" Create new campaigns also using list comprehension and placing then into numpy array
-    Check and set email for next email to be sent
+""" 
+Create new campaigns also using list comprehension and placing then into numpy array
+
+:param gspread.worksheet sh: spreadsheet to read
+:param str names: the name of the campaign in string
+:param int number: the number of campaigns to make
+
+:return numpy.ndarray array_of_campaigns : list of campaigns and the people
+
 """
 
 
@@ -47,19 +72,22 @@ def campaigns(sh, names, number):
             People(person[0], person[1], person[2], person[3], person[4], person[5]) for person in people_in_campaign
         ]
         array_of_campaigns[i].add_people(people_in_campaign)
+
     return array_of_campaigns
 
 
-""" Sort the people with the campaigns, organisation, roles, names and emails """
+"""
+# TODO
 
-
-def people(all_people, extra_campaigns_list):
-    pass
-    # print(all_people)
+- Find a solution to sort out the campaign page after the client meeting
+- Create an AppScript function to add timestamp as soon as Ramon adds the email
+- Add a way to check when the next email is to be sent and if it is empty then send them the welcome email
+- Add a way to write data to log as soon as emails are sent
+"""
 
 
 def main():
-    start = timer()
+    # start = timer()
     # Authenticate the service account using jwt stored in drip-config.py
     gc = gspread.service_account(filename="drip-config.json")
 
@@ -76,12 +104,11 @@ def main():
     all_people = retrieve_data(sh, 5)[1:]  # read everything after row 1
 
     array_of_campaigns = campaigns(sh, name_of_campaigns, number_of_campaigns)
-    # print(array_of_campaigns)
 
-    # template(template_data)
-    print(array_of_campaigns[0].get_people()[0].get_date())
-    end = timer()
-    print("it takes " + str((end - start)) + " seconds")
+    template(template_data)
+
+    # end = timer()
+    # print("it takes " + str((end - start)) + " seconds")
 
 
 if __name__ == "__main__":
