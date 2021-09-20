@@ -3,17 +3,22 @@ import numpy as np
 
 
 class People:
-    def __init__(self, email, first_name, last_name, organisation, role, tag):
+    def __init__(self, date_joined, email, first_name, last_name, organisation, role, tag, email_tracker):
+        self.date_joined = date_joined
         self.email = email
         self.first_name = first_name
         self.last_name = last_name
         self.organisation = organisation
         self.role = role
         self.tag = tag
-        self.date = np.datetime64('now')
+        self.email_tracker = email_tracker
+        self.time = ""
 
     def get_fullname(self):
         return self.first_name + " " + self.last_name
+
+    def get_date_joined(self):
+        return self.date_joined
 
     def get_email(self):
         return self.email
@@ -27,8 +32,17 @@ class People:
     def get_tag(self):
         return self.tag
 
-    def get_date(self):
-        return self.date
+    def get_tracker(self):
+        return self.email_tracker
+
+    def set_tracker(self, date, time):
+        if time == "":
+            self.email_tracker = date + np.timedelta64(10, "h")
+        else:
+            if "am" in time:
+                self.email_tracker = date + np.timedelta64(int(time[:2]), "h")
+            else:
+                self.email_tracker = date + np.timedelta64(int(time[:1]) + 12, "h")
 
 
 """ Campaign class to store information about each campaign """

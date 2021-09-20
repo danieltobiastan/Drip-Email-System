@@ -7,10 +7,10 @@ from sendgrid.helpers.mail import Mail
 This is just to check if you have .env file in your working directory
 """
 
-if os.path.exists('.env'):
+if os.path.exists(".env"):
     load_dotenv()
 else:
-    print('Missing .env file in the current working directory')
+    print("Missing .env file in the current working directory")
 
 """ 
 Send emails based on the given parameters 
