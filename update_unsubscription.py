@@ -1,5 +1,7 @@
 import requests
 import json
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 
 url = "https://api.sendgrid.com/v3/suppression/unsubscribes"
 
@@ -15,9 +17,6 @@ response = requests.request("GET", url, data=payload, headers=headers)
 
 unsub_users = json.loads(response.text)
 unsub_emails = [user_info['email'] for user_info in unsub_users]
-
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
 
 # use creds to create a client to interact with the Google Drive API
 scope = ['https://spreadsheets.google.com/feeds',
