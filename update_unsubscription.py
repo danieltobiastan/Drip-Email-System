@@ -24,6 +24,12 @@ scope = ['https://spreadsheets.google.com/feeds',
 creds = ServiceAccountCredentials.from_json_keyfile_name('/Users/black/Desktop/drip-config.json', scope)
 client = gspread.authorize(creds)
 
+# get json key from github
+#drip_cfg_resp = requests.get('https://raw.githubusercontent.com/Extrosoph/Drip-Email-System/python/drip-config.json')
+#creds_dict = drip_cfg_resp.json()
+#credentials = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
+#client = gspread.authorize(credentials)
+
 # Find a workbook by name and open the first sheet
 # Make sure you use the right name here.
 sheet = client.open("Python of Drip Config (UWA 3)").sheet1
