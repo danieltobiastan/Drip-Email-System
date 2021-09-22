@@ -27,13 +27,14 @@ Send emails based on the given parameters
 - check by response / exception code to check is the email was sent
 """
 
+"chenjack208@gmail.com"
 
-def send_email(list_of_emails, email_template, subject):
+def send_email(email_to, email_from, email_template, subject):
     # build email
     message = Mail(
         # we will need to put the from email into the .env file
-        from_email="chenjack208@gmail.com",
-        to_emails=list_of_emails,
+        from_email=email_from,
+        to_emails=email_to,
         subject=subject,
     )
 
