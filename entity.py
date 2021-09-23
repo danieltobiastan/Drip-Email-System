@@ -5,7 +5,7 @@ import numpy as np
 
 
 class People:
-    def __init__(self, date_joined, email, first_name, last_name, organisation, role, tag, email_tracker):
+    def __init__(self, date_joined, email, first_name, last_name, organisation, role, tag):
         self.date_joined = date_joined
         self.email = email
         self.first_name = first_name
@@ -13,7 +13,7 @@ class People:
         self.organisation = organisation
         self.role = role
         self.tag = tag
-        self.email_tracker = email_tracker
+        self.email_tracker = ''
         self.time = ''
 
     def get_fullname(self):
@@ -36,6 +36,12 @@ class People:
 
     def get_tracker(self):
         return self.email_tracker
+
+    def read_tracker(self, date):
+        if date != '':
+            self.email_tracker = np.datetime64(date)
+        else:
+            self.email_tracker = date
 
     def set_tracker(self, date, time):
         if time == "":
