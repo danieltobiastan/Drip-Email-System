@@ -127,19 +127,6 @@ Set the next email templates for the next email to be sent in the campaign list
 """
 
 
-def next_email_template(campaign, template_id):
-    for person in campaign.get_people():
-        person.set_next_template(template_id)
-
-
-"""
-Set the next email templates for the next email to be sent in the campaign list
-
-:param Campaign campaign: campaign object that holds the people objects
-:param str template_id: the id of the next template
-"""
-
-
 def finding_duplicates_dates(people):
     dates = [person.get_tracker() for person in people]
     seen = {}
@@ -174,26 +161,22 @@ def main():
 
     # [CONTACTS, CAMPAIGNS, TEMPLATES, UNSUBSCRIBE, LOG, ALL, ProUser, Support, Emails]
     # Retrieve all data
-
     number_of_campaigns = retrieve_data(sh, "len") - 5  # because 5 sheets are constant
     name_of_campaigns = retrieve_data(sh, "name")[5:]
     campaign_metadata = retrieve_data(sh, 1)[:3]
     campaign_data = retrieve_data(sh, 1)[3:]
     template_data = retrieve_data(sh, 2)
-    all_people = retrieve_data(sh, 5)[1:]  # read everything after row 1
 
     # print(campaign_metadata)
     campaign_array = np.array(campaign_data).transpose()
-    # print(campaign_array)
 
-    # print(campaign_array[2])
+    print(campaign_array[2])
     array_of_campaigns = campaigns(sh, name_of_campaigns, number_of_campaigns)
     template_dict = template(template_data)
     # print(template_dict)
 
     # Part one to start creating functions for the first campaign "ALL"
 
-    email_to = []
     # Find people who have same timing
     seen, duplicates = finding_duplicates_dates(array_of_campaigns[0].get_people())
     print(seen, duplicates)
@@ -201,37 +184,76 @@ def main():
     # To get the number of different email batches we get the length of the seen dictionary as each email in seen will
     # have a different ID
     number_of_batches = len(seen)
+    email_batches = []
 
     # for each batches we create the email object to be sent to the send_email function
+    list_of_emails = array_of_campaigns[0].get_people()
+    email_to = []
+    time_to_send = ''
     for key in seen:
-        # if key == '':
-            # Email(from, to, time)
-        print(key)
-        # Email(from, to, key)
+        if key == '':
 
-    print(email_to)
-    # send welcome
-    email_template = template_dict.get(campaign_array[1][1])
-    subject = campaign_array[1][1]
-    # send_email(email_to, email_template, subject)
+            # If it is the first email in the campaign
+            chosen_template = template_dict.get(campaign_array[1][1])
+            subject = campaign_array[1][1]
+            email_to = [list_of_emails[email].get_email() for email in seen[key]]
+            time_to_send = np.datetime64('today', 'D') + np.timedelta64(10, "h")
+            email_from = campaign_metadata[2][1]
+            current_batch = Email(email_from, email_to, time_to_send, subject, chosen_template)
+            email_batches.append(current_batch)
+
+        else:
+            # Check the email time and compare to the difference between date joined to the next email day to get the
+            # template ID
+            email_to = [list_of_emails[email].get_email() for email in seen[key]]
+
+            # Since they have the same next email date that means they joined on the same day
+            # Because it gives the time in seconds we convert to days by // 86400
+            day_difference = np.datetime64(key, 'D') - np.datetime64(list_of_emails[seen[key][0]].get_date_joined(), 'D') // 86400
+            time = int(list_of_emails[seen[key][0]].get_date_joined().astype(str)[11:13])
+
+            # Check if the time is am or pm and build the time string
+            if time > 12:
+                time = str(day_difference) + ' ,' + str(time - 12) + 'pm'
+            else:
+                time = str(day_difference) + ' ,' + str(time) + 'am'
+
+            # Search through the campaign page to get the subject
+            subject = campaign_array[1][campaign_array[2].index(time)]
+            chosen_template = template_dict.get(subject)
+            time_to_send = key
+
+            # Email from stays constant
+            email_from = campaign_metadata[2][1]
+            current_batch = Email(email_from, email_to, time_to_send, subject, chosen_template)
+            email_batches.append(current_batch)
+
+    # Testing only here nothing important
+    # print(campaign_array[2])
+    # day = np.datetime64(list_of_emails[seen[key][0]].get_date_joined() + np.timedelta64(4, 'h'))
+    # print(int(day.astype(str)[11:13]))
+    # print(np.datetime64(list_of_emails[seen[key][0]].get_date_joined() + np.timedelta64(53, 'h')))
+    # print(email_to)
+    # print(time_to_send)
+    # print(campaign_metadata[2][1])
+
+    print(email_batches[0].get_time_to_send())
+    send_email(email_batches)
 
     # add to log
 
     # set the date for next email
     # print(campaign_array[2][2])
     next_email_date(array_of_campaigns[0], campaign_array[2][2])
-    next_email_template(array_of_campaigns[0], template_dict.get(campaign_array[1][1]))
 
     next_dates = []
     next_template = []
     for people in array_of_campaigns[0].get_people():
         next_dates.append([str(people.get_tracker())])
-        next_template.append([people.get_next_template()])
 
 
     # Update the spread sheet
     # sh.worksheets()[-3].update('L2:M8', next_dates)
-    # sh.worksheets()[-3].update('M2:N8', next_template)
 
     # end = timer()
     # print("it takes " + str((end - start)) + " seconds")

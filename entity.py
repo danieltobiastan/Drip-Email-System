@@ -15,7 +15,6 @@ class People:
         self.tag = tag
         self.email_tracker = email_tracker
         self.time = ''
-        self.next_template = ''
 
     def get_fullname(self):
         return self.first_name + " " + self.last_name
@@ -38,9 +37,6 @@ class People:
     def get_tracker(self):
         return self.email_tracker
 
-    def get_next_template(self):
-        return self.next_template
-
     def set_tracker(self, date, time):
         if time == "":
             self.email_tracker = date + np.timedelta64(10, "h")
@@ -49,9 +45,6 @@ class People:
                 self.email_tracker = date + np.timedelta64(int(time[:2]), "h")
             else:
                 self.email_tracker = date + np.timedelta64(int(time[:1]) + 12, "h")
-
-    def set_next_template(self, template):
-        self.next_template = template
 
 
 """ Campaign class to store information about each campaign """
@@ -83,11 +76,27 @@ class Campaign:
 
 
 class Email:
-    def __init__(self, email_from, email_to, time_to_send):
+    def __init__(self, email_from, email_to, time_to_send, subject, template):
         self.email_to = email_to
         self.email_from = email_from
         self.time_to_send = time_to_send
+        self.subject = subject
+        self.template = template
 
+    def get_email_to(self):
+        return self.email_to
+
+    def get_email_from(self):
+        return self.email_from
+
+    def get_time_to_send(self):
+        return self.time_to_send
+
+    def get_subject(self):
+        return self.subject
+
+    def get_template(self):
+        return self.template
 
 """" Testing functionality with dummy data """
 # person1 = People("aixxmtg@charter.gov", "Paul", "Beal", "Twillio", "CEO", "Support")

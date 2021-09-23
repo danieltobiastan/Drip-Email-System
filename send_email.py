@@ -15,35 +15,35 @@ else:
 """ 
 Send emails based on the given parameters 
 
-:param list_of_emails: list of email or just one long string
-:param str email template: the SendGrid template of the email
-:param str subject: the subject of the email in string
+:param list email_batches: list of different email batches to send at specific times
 
 :return
 - currently no returns but prints the response
 
 # TODO
+- set a time to run this function
 - possibly add placeholder based on email template as a parameter.
 - check by response / exception code to check is the email was sent
 """
 
 "chenjack208@gmail.com"
 
-def send_email(email_to, email_from, email_template, subject):
-    # build email
-    message = Mail(
-        # we will need to put the from email into the .env file
-        from_email=email_from,
-        to_emails=email_to,
-        subject=subject,
-    )
-
-    try:
-        message.template_id = email_template
-        sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
-        response = sg.send(message)
-        print(response.status_code)
-        print(response.body)
-        print(response.headers)
-    except Exception as e:
-        print(e)
+def send_email(email_batches):
+    pass
+    # # build email
+    # message = Mail(
+    #     # we will need to put the from email into the .env file
+    #     from_email=email_from,
+    #     to_emails=email_to,
+    #     subject=subject,
+    # )
+    #
+    # try:
+    #     message.template_id = email_template
+    #     sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
+    #     response = sg.send(message)
+    #     print(response.status_code)
+    #     print(response.body)
+    #     print(response.headers)
+    # except Exception as e:
+    #     print(e)
