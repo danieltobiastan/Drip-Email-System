@@ -11,11 +11,9 @@ from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 
 """
-Global variables
+Global variable
 """
-
 email_batches = []
-email_start = False
 
 """ 
 Obtains data from the spreadsheet based on parameter
@@ -174,14 +172,15 @@ Send emails based on the given parameters
 
 
 async def send_email(emails):
+    send_email_context = False
     while True:
         timezone_Perth = pytz.timezone("Australia/Perth")
         time_now = datetime.now(timezone_Perth).time()
-        if (time_now.hour == 0 and time_now.minute == 0 and time_now == 0) or (email_start == True):
+        if (time_now.hour == 0 and time_now.minute == 0 and time_now == 0) or (send_email_context == True):
             if len(emails) == 0:
                 pass
             else:
-                email_start = True
+                send_email_context = True
                 if os.path.exists(".env"):
                     # This is just to check if you have .env file in your working directory
                     load_dotenv()
@@ -242,6 +241,7 @@ async def main():
             campaign_id_col = 1
             campaign_date_col = 2
             sender_col = 1
+            email_batches = []
             # Start checking for all campaigns
             for campaign in array_of_campaigns:
                 # Part one to start creating functions for the first campaign "ALL"
