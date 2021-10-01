@@ -9,6 +9,7 @@ from timeit import default_timer as timer
 from datetime import datetime
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
+from python_http_client.exceptions import HTTPError
 
 """
 Global variable for testing
@@ -187,6 +188,7 @@ def send_email(emails):
                 # This is just to check if you have .env file in your working directory
                 load_dotenv()
 
+                print(emails[counter].get_email_to())
                 if testing:
                     # build email
                     message = Mail(
@@ -202,18 +204,24 @@ def send_email(emails):
                         subject=emails[counter].get_subject(),
                     )
 
-                # try:
-                #     message.template_id = email_template
-                #     sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
-                #     response = sg.send(message)
-                #     print(response.status_code)
-                #     print(response.body)
-                #     print(response.headers)
-                # except Exception as e:
-                #     print(e)
+                # possible error status
+                # HTTP Error 400: Bad Request if the template id is incorrect
+                try:
+                    message.template_id = emails[counter].get_template()
+                    sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
+                    response = sg.send(message)
+                    # possible error status
+                    # HTTP Error 400: Bad Request if the template id is incorrect
+
+                    print(response.status_code)
+                    print(response.body)
+                    print(response.headers)
+                except HTTPError as e:
+                    print(e.to_dict)
 
             else:
                 print("Missing .env file in the current working directory")
+            emails = []
         else:
             print('not yet')
             # can make it sleep until the next hour
@@ -276,7 +284,6 @@ async def main():
                 time_to_send = ""
                 for key in seen:
                     if key == "":
-
                         # If it is the first email in the campaign
                         chosen_template = template_dict.get(campaign_array[campaign_id_col][1])
                         subject = campaign_array[campaign_id_col][1]
@@ -323,7 +330,7 @@ async def main():
 
                         # Currently error here because not all emails have subject
                         # chosen_template = template_dict.get(subject)
-                        chosen_template = subject[0]
+                        chosen_template = subject.strip('"')
                         time_to_send = key
 
                         # Email from stays constant
@@ -336,10 +343,12 @@ async def main():
                 campaign_date_col += 2
                 sender_col += 2
 
-            print(email_batches[0].get_email_to())
-            print(email_batches[1].get_email_to())
-            print(email_batches[0].get_time_to_send())
-            print(email_batches[1].get_time_to_send())
+            # print(email_batches[0].get_email_to())
+            # print(email_batches[0].get_template())
+            # print(email_batches[0].get_time_to_send())
+            # print(email_batches[1].get_email_to())
+            # print(email_batches[1].get_template())
+            # print(email_batches[1].get_time_to_send())
 
             end = timer()
             time_taken = int(end - start)
