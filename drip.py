@@ -168,8 +168,6 @@ Send emails based on the given parameters
 - check by response / exception code to check is the email was sent
 """
 
-"chenjack208@gmail.com"
-
 
 def send_email(emails):
     # This function should stop by the end of the day
