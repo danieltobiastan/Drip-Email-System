@@ -171,25 +171,39 @@ Send emails based on the given parameters
 "chenjack208@gmail.com"
 
 
-async def send_email(emails):
-    while True:
+def send_email(emails):
+    # This function should stop by the end of the day
+
+    # sort time to send just in case they are not in order
+    # print(type(emails[0].get_time_to_send()))
+    # NVM date should always be in order
+
+    # while there are emails to send
+    counter = 0
+    while len(emails) > 0:
         timezone_Perth = pytz.timezone("Australia/Perth")
         time_now = datetime.now(timezone_Perth).time()
-        if len(emails) == 0:
-            pass
-        else:
-            send_email_context = True
+        hour = int(emails[counter].get_time_to_send().astype(str)[11:])
+        if time_now.hour == hour or testing == True:
             if os.path.exists(".env"):
                 # This is just to check if you have .env file in your working directory
                 load_dotenv()
-                # build email
-                # message = Mail(
-                #     # we will need to put the from email into the .env file
-                #     from_email=email_from,
-                #     to_emails=email_to,
-                #     subject=subject,
-                # )
-                #
+
+                if testing:
+                    # build email
+                    message = Mail(
+                        from_email=os.getenv('email_from'),
+                        to_emails=emails[counter].get_email_to(),
+                        subject=emails[counter].get_subject(),
+                    )
+                else:
+                    # build email
+                    message = Mail(
+                        from_email=emails[counter].get_email_from(),
+                        to_emails=emails[counter].get_email_to(),
+                        subject=emails[counter].get_subject(),
+                    )
+
                 # try:
                 #     message.template_id = email_template
                 #     sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
@@ -199,8 +213,14 @@ async def send_email(emails):
                 #     print(response.headers)
                 # except Exception as e:
                 #     print(e)
+
             else:
                 print("Missing .env file in the current working directory")
+        else:
+            print('not yet')
+            # can make it sleep until the next hour
+            # but pass for now
+            pass
 
 
 """
@@ -267,9 +287,9 @@ async def main():
                             time_to_send = np.datetime64("today", "D") + np.timedelta64(10, "h")
                         else:
                             time_to_send = (
-                                list_of_emails[seen[key][0]].get_date_joined()
-                                + np.timedelta64(campaign_array[campaign_date_col][1], "D")
-                                + np.timedelta64(10, "h")
+                                    list_of_emails[seen[key][0]].get_date_joined()
+                                    + np.timedelta64(campaign_array[campaign_date_col][1], "D")
+                                    + np.timedelta64(10, "h")
                             )
                         email_from = campaign_metadata[2][sender_col]
                         current_batch = Email(email_from, email_to, time_to_send, subject, chosen_template)
@@ -284,11 +304,11 @@ async def main():
                         # Because it gives the time in seconds we convert to days by // 86400
                         day_difference = (
                             (
-                                np.datetime64(key, "D")
-                                - np.datetime64(list_of_emails[seen[key][0]].get_date_joined(), "D")
+                                    np.datetime64(key, "D")
+                                    - np.datetime64(list_of_emails[seen[key][0]].get_date_joined(), "D")
                             )
-                            .astype(str)[:-4]
-                            .strip()
+                                .astype(str)[:-4]
+                                .strip()
                         )
                         time = int(list_of_emails[seen[key][0]].get_tracker().astype(str)[11:13])
 
@@ -328,6 +348,7 @@ async def main():
             print("it takes " + str((end - start)) + " seconds")
 
             # call send email here once ready
+            send_email(email_batches)
 
             # Just testing purpose so it doesn`t get errors
             if testing == True:
