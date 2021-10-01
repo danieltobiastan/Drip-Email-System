@@ -10,6 +10,11 @@ from datetime import datetime
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 
+"""
+Global variable for testing
+"""
+testing = True
+
 """ 
 Obtains data from the spreadsheet based on parameter
 
@@ -167,36 +172,35 @@ Send emails based on the given parameters
 
 
 async def send_email(emails):
-    send_email_context = False
     while True:
         timezone_Perth = pytz.timezone("Australia/Perth")
         time_now = datetime.now(timezone_Perth).time()
-            if len(emails) == 0:
-                pass
+        if len(emails) == 0:
+            pass
+        else:
+            send_email_context = True
+            if os.path.exists(".env"):
+                # This is just to check if you have .env file in your working directory
+                load_dotenv()
+                # build email
+                # message = Mail(
+                #     # we will need to put the from email into the .env file
+                #     from_email=email_from,
+                #     to_emails=email_to,
+                #     subject=subject,
+                # )
+                #
+                # try:
+                #     message.template_id = email_template
+                #     sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
+                #     response = sg.send(message)
+                #     print(response.status_code)
+                #     print(response.body)
+                #     print(response.headers)
+                # except Exception as e:
+                #     print(e)
             else:
-                send_email_context = True
-                if os.path.exists(".env"):
-                    # This is just to check if you have .env file in your working directory
-                    load_dotenv()
-                    # build email
-                    # message = Mail(
-                    #     # we will need to put the from email into the .env file
-                    #     from_email=email_from,
-                    #     to_emails=email_to,
-                    #     subject=subject,
-                    # )
-                    #
-                    # try:
-                    #     message.template_id = email_template
-                    #     sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
-                    #     response = sg.send(message)
-                    #     print(response.status_code)
-                    #     print(response.body)
-                    #     print(response.headers)
-                    # except Exception as e:
-                    #     print(e)
-                else:
-                    print("Missing .env file in the current working directory")
+                print("Missing .env file in the current working directory")
 
 
 """
@@ -212,117 +216,125 @@ async def main():
         # Start the main function at the start of the day 00:00:00 at Perth time
         timezone_Perth = pytz.timezone("Australia/Perth")
         time_now = datetime.now(timezone_Perth).time()
-        # if time_now.hour == 0 and time_now.minute == 0 and time_now == 0:
-        start = timer()
-        # Authenticate the service account using jwt stored in drip-config.py
-        gc = gspread.service_account(filename="drip-config.json")
 
-        # Index the spreadsheet with the name
-        sh = gc.open("Python of Drip Config (UWA 3)")
+        # Start at he beginning of the day
+        if (time_now.hour == 0 and time_now.minute == 0) or testing == True:
+            start = timer()
+            # Authenticate the service account using jwt stored in drip-config.py
+            gc = gspread.service_account(filename="drip-config.json")
 
-        # [CONTACTS, CAMPAIGNS, TEMPLATES, UNSUBSCRIBE, LOG, ALL, ProUser, Support, Emails]
-        # Retrieve all data
-        number_of_campaigns = retrieve_data(sh, "len") - 5  # because 5 sheets are constant
-        name_of_campaigns = retrieve_data(sh, "name")[5:]
-        campaign_metadata = retrieve_data(sh, 1)[:3]
-        campaign_data = retrieve_data(sh, 1)[3:]
-        template_data = retrieve_data(sh, 2)
+            # Index the spreadsheet with the name
+            sh = gc.open("Python of Drip Config (UWA 3)")
 
-        campaign_array = np.array(campaign_data).transpose()
-        array_of_campaigns = campaigns(sh, name_of_campaigns, number_of_campaigns)
-        template_dict = template(template_data)
+            # [CONTACTS, CAMPAIGNS, TEMPLATES, UNSUBSCRIBE, LOG, ALL, ProUser, Support, Emails]
+            # Retrieve all data
+            number_of_campaigns = retrieve_data(sh, "len") - 5  # because 5 sheets are constant
+            name_of_campaigns = retrieve_data(sh, "name")[5:]
+            campaign_metadata = retrieve_data(sh, 1)[:3]
+            campaign_data = retrieve_data(sh, 1)[3:]
+            template_data = retrieve_data(sh, 2)
 
-        campaign_id_col = 1
-        campaign_date_col = 2
-        sender_col = 1
-        email_batches = []
-        # Start checking for all campaigns
-        for campaign in array_of_campaigns:
-            # Part one to start creating functions for the first campaign "ALL"
+            campaign_array = np.array(campaign_data).transpose()
+            array_of_campaigns = campaigns(sh, name_of_campaigns, number_of_campaigns)
+            template_dict = template(template_data)
 
-            # Find people who have same timing
-            seen, duplicates = finding_duplicates_dates(campaign.get_people())
+            campaign_id_col = 1
+            campaign_date_col = 2
+            sender_col = 1
+            email_batches = []
+            # Start checking for all campaigns
+            for campaign in array_of_campaigns:
+                # Part one to start creating functions for the first campaign "ALL"
 
-            # To get the number of different email batches we get the length of the seen dictionary as each email
-            # in seen will have a different ID
+                # Find people who have same timing
+                seen, duplicates = finding_duplicates_dates(campaign.get_people())
 
-            # for each batches we create the email object to be sent to the send_email function
-            list_of_emails = campaign.get_people()
-            email_to = []
-            time_to_send = ""
-            for key in seen:
-                if key == "":
+                # To get the number of different email batches we get the length of the seen dictionary as each email
+                # in seen will have a different ID
 
-                    # If it is the first email in the campaign
-                    chosen_template = template_dict.get(campaign_array[campaign_id_col][1])
-                    subject = campaign_array[campaign_id_col][1]
-                    email_to = [list_of_emails[email].get_email() for email in seen[key]]
-                    if campaign_date_col == 2:
-                        time_to_send = np.datetime64("today", "D") + np.timedelta64(10, "h")
+                # for each batches we create the email object to be sent to the send_email function
+                list_of_emails = campaign.get_people()
+                email_to = []
+                time_to_send = ""
+                for key in seen:
+                    if key == "":
+
+                        # If it is the first email in the campaign
+                        chosen_template = template_dict.get(campaign_array[campaign_id_col][1])
+                        subject = campaign_array[campaign_id_col][1]
+                        email_to = [list_of_emails[email].get_email() for email in seen[key]]
+                        if campaign_date_col == 2:
+                            time_to_send = np.datetime64("today", "D") + np.timedelta64(10, "h")
+                        else:
+                            time_to_send = (
+                                list_of_emails[seen[key][0]].get_date_joined()
+                                + np.timedelta64(campaign_array[campaign_date_col][1], "D")
+                                + np.timedelta64(10, "h")
+                            )
+                        email_from = campaign_metadata[2][sender_col]
+                        current_batch = Email(email_from, email_to, time_to_send, subject, chosen_template)
+                        email_batches.append(current_batch)
+
                     else:
-                        time_to_send = (
-                            list_of_emails[seen[key][0]].get_date_joined()
-                            + np.timedelta64(campaign_array[campaign_date_col][1], "D")
-                            + np.timedelta64(10, "h")
+                        # Check the email time and compare to the difference between date joined to the next email day
+                        # to get the template ID
+                        email_to = [list_of_emails[email].get_email() for email in seen[key]]
+
+                        # Since they have the same next email date that means they joined on the same day
+                        # Because it gives the time in seconds we convert to days by // 86400
+                        day_difference = (
+                            (
+                                np.datetime64(key, "D")
+                                - np.datetime64(list_of_emails[seen[key][0]].get_date_joined(), "D")
+                            )
+                            .astype(str)[:-4]
+                            .strip()
                         )
-                    email_from = campaign_metadata[2][sender_col]
-                    current_batch = Email(email_from, email_to, time_to_send, subject, chosen_template)
-                    email_batches.append(current_batch)
+                        time = int(list_of_emails[seen[key][0]].get_tracker().astype(str)[11:13])
 
-                else:
-                    # Check the email time and compare to the difference between date joined to the next email day
-                    # to get the template ID
-                    email_to = [list_of_emails[email].get_email() for email in seen[key]]
+                        # Check if the time is am or pm and build the time string
+                        if time > 12:
+                            time = str(day_difference + ", " + str(time - 12) + "pm")
+                        else:
+                            time = str(day_difference + ", " + str(time) + "am")
 
-                    # Since they have the same next email date that means they joined on the same day
-                    # Because it gives the time in seconds we convert to days by // 86400
-                    day_difference = (
-                        (
-                            np.datetime64(key, "D")
-                            - np.datetime64(list_of_emails[seen[key][0]].get_date_joined(), "D")
-                        )
-                        .astype(str)[:-4]
-                        .strip()
-                    )
-                    time = int(list_of_emails[seen[key][0]].get_tracker().astype(str)[11:13])
+                        # Search through the campaign page to get the subject
+                        subject = campaign_array[campaign_id_col][np.where(campaign_array[campaign_date_col] == time)][
+                            0
+                        ]
 
-                    # Check if the time is am or pm and build the time string
-                    if time > 12:
-                        time = str(day_difference + ", " + str(time - 12) + "pm")
-                    else:
-                        time = str(day_difference + ", " + str(time) + "am")
+                        # Currently error here because not all emails have subject
+                        # chosen_template = template_dict.get(subject)
+                        chosen_template = subject[0]
+                        time_to_send = key
 
-                    # Search through the campaign page to get the subject
-                    subject = campaign_array[campaign_id_col][np.where(campaign_array[campaign_date_col] == time)][
-                        0
-                    ]
+                        # Email from stays constant
+                        email_from = campaign_metadata[2][sender_col]
+                        current_batch = Email(email_from, email_to, time_to_send, subject, chosen_template)
+                        email_batches.append(current_batch)
 
-                    # Currently error here because not all emails have subject
-                    # chosen_template = template_dict.get(subject)
-                    chosen_template = subject[0]
-                    time_to_send = key
+                # Update these variables for the next campaigns
+                campaign_id_col += 2
+                campaign_date_col += 2
+                sender_col += 2
 
-                    # Email from stays constant
-                    email_from = campaign_metadata[2][sender_col]
-                    current_batch = Email(email_from, email_to, time_to_send, subject, chosen_template)
-                    email_batches.append(current_batch)
+            print(email_batches[0].get_email_to())
+            print(email_batches[1].get_email_to())
+            print(email_batches[0].get_time_to_send())
+            print(email_batches[1].get_time_to_send())
 
-            # Update these variables for the next campaigns
-            campaign_id_col += 2
-            campaign_date_col += 2
-            sender_col += 2
+            end = timer()
+            time_taken = int(end - start)
+            print("it takes " + str((end - start)) + " seconds")
 
-        # print(email_batches[0].get_email_to())
-        # print(email_batches[1].get_email_to())
-        # print(email_batches[0].get_time_to_send())
-        # print(email_batches[1].get_time_to_send())
+            # call send email here once ready
 
-        end = timer()
-        time_taken = int(end - start)
-        print("it takes " + str((end - start)) + " seconds")
+            # Just testing purpose so it doesn`t get errors
+            if testing == True:
+                await asyncio.sleep(86400)
     else:
-        # wait until next day
-        await asyncio.sleep(1)
+        # Do nothing if the current time is not the start of the day
+        pass
 
 
 if __name__ == "__main__":
