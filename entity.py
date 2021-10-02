@@ -82,12 +82,13 @@ class Campaign:
 
 
 class Email:
-    def __init__(self, email_from, email_to, time_to_send, subject, template):
+    def __init__(self, email_from, email_to, time_to_send, subject, template, campaign):
         self.email_to = email_to
         self.email_from = email_from
         self.time_to_send = time_to_send
         self.subject = subject
         self.template = template
+        self.campaign = campaign
 
     def get_email_to(self):
         return self.email_to
@@ -103,6 +104,9 @@ class Email:
 
     def get_template(self):
         return self.template
+
+    def get_campaign(self):
+        return self.campaing
 
 """" Testing functionality with dummy data """
 # person1 = People("aixxmtg@charter.gov", "Paul", "Beal", "Twillio", "CEO", "Support")

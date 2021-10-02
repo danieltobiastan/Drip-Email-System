@@ -3,6 +3,7 @@ import asyncio
 import numpy as np
 import os
 import pytz
+from pprint import pprint
 from dotenv import load_dotenv
 from entity import People, Campaign, Email
 from timeit import default_timer as timer
@@ -10,6 +11,8 @@ from datetime import datetime
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 from python_http_client.exceptions import HTTPError
+from googleapiclient import discovery
+from google.oauth2 import service_account
 
 """
 Global variable for testing
@@ -164,13 +167,13 @@ Send emails based on the given parameters
 - currently no returns but prints the response
 
 # TODO
-- set a time to run this function
-- possibly add placeholder based on email template as a parameter.
-- check by response / exception code to check is the email was sent
+    - Add to log
+    - Check next date to be sent
+    - Update the google sheet
 """
 
 
-def send_email(emails):
+def send_email(emails, sh):
     # This function should stop by the end of the day
 
     # sort time to send just in case they are not in order
@@ -180,50 +183,95 @@ def send_email(emails):
     # while there are emails to send
     counter = 0
     while len(emails) > 0:
-        timezone_Perth = pytz.timezone("Australia/Perth")
-        time_now = datetime.now(timezone_Perth).time()
+        timezone = pytz.timezone(os.getenv("timezone"))
+        time_now = datetime.now(timezone).time()
         hour = int(emails[counter].get_time_to_send().astype(str)[11:])
-        if time_now.hour == hour or testing == True:
-            if os.path.exists(".env"):
-                # This is just to check if you have .env file in your working directory
-                load_dotenv()
+        response_code = 0
+        if time_now.hour == hour or testing:
 
-                print(emails[counter].get_email_to())
-                if testing:
-                    # build email
-                    message = Mail(
-                        from_email=os.getenv('email_from'),
-                        to_emails=emails[counter].get_email_to(),
-                        subject=emails[counter].get_subject(),
-                    )
-                else:
-                    # build email
-                    message = Mail(
-                        from_email=emails[counter].get_email_from(),
-                        to_emails=emails[counter].get_email_to(),
-                        subject=emails[counter].get_subject(),
-                    )
-
-                # possible error status
-                # HTTP Error 400: Bad Request if the template id is incorrect
-                try:
-                    message.template_id = emails[counter].get_template()
-                    sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
-                    response = sg.send(message)
-                    # possible error status
-                    # HTTP Error 400: Bad Request if the template id is incorrect
-
-                    print(response.status_code)
-                    print(response.body)
-                    print(response.headers)
-                except HTTPError as e:
-                    print(e.to_dict)
-
+            print(emails[counter].get_email_to())
+            if testing:
+                # build email
+                message = Mail(
+                    from_email=os.getenv("email_from"),
+                    to_emails=emails[counter].get_email_to(),
+                    subject=emails[counter].get_subject(),
+                )
             else:
-                print("Missing .env file in the current working directory")
-            emails = []
+                # build email
+                message = Mail(
+                    from_email=emails[counter].get_email_from(),
+                    to_emails=emails[counter].get_email_to(),
+                    subject=emails[counter].get_subject(),
+                )
+
+            try:
+                message.template_id = emails[counter].get_template()
+                sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
+                response = sg.send(message)
+                response_code = response.status_code
+                print("status code")
+                print(response.status_code)
+                # print(type(response.status_code))
+                # print("body")
+                # print(response.body)
+                # print(type(response.body))
+                # print("header")
+                # print(response.headers)
+                # print(type(response.headers))
+            except HTTPError as e:
+                print(e.to_dict)
+
+            # Assuming emails are sent correctly code 200
+            # Not sure if the sheet will be closed by now?
+            if response_code == 200 or testing:
+                # Add to log
+                credentials = service_account.Credentials.from_service_account_file("drip-config.json")
+                service = discovery.build("sheets", "v4", credentials=credentials)
+
+                # Initialise the request
+                spreadsheet_id = os.getenv('spreadsheet_id')
+                range_ = "LOG"
+                value_input_option = "USER_ENTERED"
+                insert_data_option = "INSERT_ROWS"
+
+                log = []
+                list_of_emails = emails[counter].get_email_to()
+                template_used = emails[counter].get_template()
+
+                for i in range(len(list_of_emails)):
+                    now = datetime.now(timezone).strftime("%d/%m/%Y %H:%M")
+                    log.append([list_of_emails[i], template_used, now])
+
+                value_range_body = {"values": log}
+
+                request = (
+                    service.spreadsheets()
+                    .values()
+                    .append(
+                        spreadsheetId=spreadsheet_id,
+                        range=range_,
+                        valueInputOption=value_input_option,
+                        insertDataOption=insert_data_option,
+                        body=value_range_body,
+                    )
+                )
+
+                response = request.execute()
+
+                # Check the next date added and update the values
+
+                if testing:
+                    emails = []
+
+            # else:
+            # Do something depending on the error
+            # Add to log
+            # Check next date to be sent
+            # Update the google sheet
+
         else:
-            print('not yet')
+            print("not yet")
             # can make it sleep until the next hour
             # but pass for now
             pass
@@ -240,8 +288,8 @@ def send_email(emails):
 async def main():
     while True:
         # Start the main function at the start of the day 00:00:00 at Perth time
-        timezone_Perth = pytz.timezone("Australia/Perth")
-        time_now = datetime.now(timezone_Perth).time()
+        timezone = pytz.timezone(os.getenv("timezone"))
+        time_now = datetime.now(timezone).time()
 
         # Start at he beginning of the day
         if (time_now.hour == 0 and time_now.minute == 0) or testing == True:
@@ -250,7 +298,7 @@ async def main():
             gc = gspread.service_account(filename="drip-config.json")
 
             # Index the spreadsheet with the name
-            sh = gc.open("Python of Drip Config (UWA 3)")
+            sh = gc.open(os.getenv("Sheet_title"))
 
             # [CONTACTS, CAMPAIGNS, TEMPLATES, UNSUBSCRIBE, LOG, ALL, ProUser, Support, Emails]
             # Retrieve all data
@@ -292,12 +340,12 @@ async def main():
                             time_to_send = np.datetime64("today", "D") + np.timedelta64(10, "h")
                         else:
                             time_to_send = (
-                                    list_of_emails[seen[key][0]].get_date_joined()
-                                    + np.timedelta64(campaign_array[campaign_date_col][1], "D")
-                                    + np.timedelta64(10, "h")
+                                list_of_emails[seen[key][0]].get_date_joined()
+                                + np.timedelta64(campaign_array[campaign_date_col][1], "D")
+                                + np.timedelta64(10, "h")
                             )
                         email_from = campaign_metadata[2][sender_col]
-                        current_batch = Email(email_from, email_to, time_to_send, subject, chosen_template)
+                        current_batch = Email(email_from, email_to, time_to_send, subject, chosen_template, campaign)
                         email_batches.append(current_batch)
 
                     else:
@@ -306,14 +354,14 @@ async def main():
                         email_to = [list_of_emails[email].get_email() for email in seen[key]]
 
                         # Since they have the same next email date that means they joined on the same day
-                        # Because it gives the time in seconds we convert to days by // 86400
+                        # Assuming day difference will always be positive else it will give an error
                         day_difference = (
                             (
-                                    np.datetime64(key, "D")
-                                    - np.datetime64(list_of_emails[seen[key][0]].get_date_joined(), "D")
+                                np.datetime64(key, "D")
+                                - np.datetime64(list_of_emails[seen[key][0]].get_date_joined(), "D")
                             )
-                                .astype(str)[:-4]
-                                .strip()
+                            .astype(str)[:-4]
+                            .strip()
                         )
                         time = int(list_of_emails[seen[key][0]].get_tracker().astype(str)[11:13])
 
@@ -329,13 +377,12 @@ async def main():
                         ]
 
                         # Currently error here because not all emails have subject
-                        # chosen_template = template_dict.get(subject)
                         chosen_template = subject.strip('"')
                         time_to_send = key
 
                         # Email from stays constant
                         email_from = campaign_metadata[2][sender_col]
-                        current_batch = Email(email_from, email_to, time_to_send, subject, chosen_template)
+                        current_batch = Email(email_from, email_to, time_to_send, subject, chosen_template, campaign)
                         email_batches.append(current_batch)
 
                 # Update these variables for the next campaigns
@@ -355,23 +402,28 @@ async def main():
             print("it takes " + str((end - start)) + " seconds")
 
             # call send email here once ready
-            send_email(email_batches)
+            send_email(email_batches, sh)
 
             # Just testing purpose so it doesn`t get errors
-            if testing == True:
+            if testing:
                 await asyncio.sleep(86400)
-    else:
-        # Do nothing if the current time is not the start of the day
-        pass
+        else:
+            # Do nothing if the current time is not the start of the day
+            pass
 
 
 if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    try:
-        asyncio.ensure_future(main())
-        loop.run_forever()
-    except KeyboardInterrupt:
-        pass
-    finally:
-        print("Closing Loop")
-        loop.close()
+    if os.path.exists(".env"):
+        # This is just to check if you have .env file in your working directory
+        load_dotenv()
+        loop = asyncio.get_event_loop()
+        try:
+            asyncio.ensure_future(main())
+            loop.run_forever()
+        except KeyboardInterrupt:
+            pass
+        finally:
+            print("Closing Loop")
+            loop.close()
+    else:
+        print("Missing .env file in the current working directory")
