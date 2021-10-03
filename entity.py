@@ -37,7 +37,7 @@ class People:
         """
         Get the full name of the person in the format of firstname lastname.
 
-        :return name str: The full name of the person.
+        :return str name: The full name of the person.
         """
 
         return self.first_name + " " + self.last_name
@@ -46,7 +46,7 @@ class People:
         """
         Get the date the person joined.
 
-        :return date_joined str: The date the person joined.
+        :return str date_joined : The date the person joined.
         """
 
         return self.date_joined
@@ -55,7 +55,7 @@ class People:
         """
         Get the person`s email.
 
-        :return email str: The email of the person.
+        :return str email: The email of the person.
         """
         return self.email
 
@@ -63,7 +63,7 @@ class People:
         """
         Get the organisation of the person.
 
-        :return organisation str: The organisation of the person.
+        :return str organisation: The organisation of the person.
         """
 
         return self.organisation
@@ -72,7 +72,7 @@ class People:
         """
         Get the person`s role.
 
-        :return role str: The person`s role.
+        :return str role: The person`s role.
         """
 
         return self.role
@@ -81,7 +81,7 @@ class People:
         """
         Get person`s tag.
 
-        :return tag str: The person`s tag.
+        :return str tag: The person`s tag.
         """
 
         return self.tag
@@ -90,7 +90,7 @@ class People:
         """
         Get person`s tracker to check the next date to send email.
 
-        :return email_tracker str: The next date for email to be sent.
+        :return str email_tracker: The next date for email to be sent.
         """
         return self.email_tracker
 
@@ -143,7 +143,7 @@ class Campaign:
         """
         Get the list of people in the campaign
 
-        :return people list: List of people in campaign.
+        :return list people: List of people in campaign.
         """
 
         return self.people
@@ -152,7 +152,7 @@ class Campaign:
         """
         Get the name of the campaign
 
-        :return name str: The name of the campaign.
+        :return str name: The name of the campaign.
         """
 
         return self.name
@@ -161,7 +161,7 @@ class Campaign:
         """
         Add people in the campaign.
 
-        :param list_of_people list/str: The list of people to be in the campaign.
+        :param list/str list_of_people: The list of people to be in the campaign.
         """
 
         if type(list_of_people) is list:
@@ -173,7 +173,7 @@ class Campaign:
         """
         Remove people from the campaign.
 
-        :param list_of_people list/str: The list of people be removed from campaign.
+        :param list/str list_of_people: The list of people be removed from campaign.
         """
         if type(list_of_people) is list:
             for person in list_of_people:
@@ -213,7 +213,7 @@ class Email:
         """
         Get the list of email`s receiver.
 
-        :return email_to list: The list of receiver.
+        :return list email_to: The list of receiver.
         """
         return self.email_to
 
@@ -221,7 +221,7 @@ class Email:
         """
         Get the sender`s email address.
 
-        :return email_from str: The sender`s address.
+        :return str email_from: The sender`s address.
         """
         return self.email_from
 
@@ -229,7 +229,7 @@ class Email:
         """
         Get the time to send in a numpy datetime format yyyy/mm/dd/HH.
 
-        :return time_to_send numpy.datetime64: The time for the email to be sent.
+        :return numpy.datetime64 time_to_send : The time for the email to be sent.
         """
         return self.time_to_send
 
@@ -237,7 +237,7 @@ class Email:
         """
         Get the subject of the email.
 
-        :return subject str: The subject of the email.
+        :return str subject: The subject of the email.
         """
         return self.subject
 
@@ -245,7 +245,7 @@ class Email:
         """
         Get the template of the email.
 
-        :return template str: The email`s template.
+        :return str template: The email`s template.
         """
         return self.template
 
@@ -253,7 +253,7 @@ class Email:
         """
         Get the campaign name.
 
-        :return campaign str: The campaign`s name.
+        :return str campaign: The campaign`s name.
         """
         return self.campaign
 

@@ -3,7 +3,6 @@ import asyncio
 import numpy as np
 import os
 import pytz
-from pprint import pprint
 from dotenv import load_dotenv
 from entity import People, Campaign, Email
 from timeit import default_timer as timer
@@ -14,26 +13,25 @@ from python_http_client.exceptions import HTTPError
 from googleapiclient import discovery
 from google.oauth2 import service_account
 
+testing = True
 """
 Global variable for testing
 """
-testing = True
-
-""" 
-Obtains data from the spreadsheet based on parameter
-
-:param gspread.models.Spreadsheet sso: spread sheet object from gspread
-:param types: the required data
-
-* Not sure how to do different returns comments
-:return
-- types = 'name' : name of all the possible worksheet
-- types = 'len' : total number of worksheets
-- types = 'index of sheet' : all the data of that sheet in list
-"""
 
 
-def retrieve_data(sso, types):
+def retrieve_data(sso, types: str):
+    """
+    Obtains data from the spreadsheet based on parameter.
+
+    :param gspread.models.Spreadsheet sso: spread sheet object from gspread.
+    :param types: The type of required date in the option of ['name', 'len', ''].
+    :return str name: Name of all the possible worksheet.
+    :return int length: Total number of sheet available.
+    :return list data: The data in the sheet in form of list.
+
+    Version 1.0.0
+    """
+
     worksheet = sso.worksheets()
     length = len(worksheet)
     if types == "name":  # If type is name return list of sheet names
@@ -47,15 +45,15 @@ def retrieve_data(sso, types):
         return worksheet[types].get_all_values()
 
 
-""" 
-Sort the templates and returns a dictionary
+def template(template_data: str):
+    """
+    Sort the templates and returns a dictionary.
 
-:param str template_data: the data read from sheet
-:return dict templates: the dictionary in the form of {template name: sendGrid template id}
-"""
+    :param template_data: the data read from sheet.
+    :return dict templates: the dictionary in the form of {template name: sendGrid template id}.
 
-
-def template(template_data):
+    Version 1.0.0
+    """
     # Turn list of list into  dictionary for each email template
     flat_template_data = [item for sublist in template_data for item in sublist]
     iteration = iter(flat_template_data)
@@ -63,15 +61,15 @@ def template(template_data):
     return templates
 
 
-"""
-Convert the date format from dd/mm/yyyy to yyyy/mm/dd for numpy datetime64()
-
-:param str date: date from sheet
-:return np.datetime64 day: date in datetime64 format
-"""
-
-
 def date_format_sheet_python(date):
+    """
+    Convert the date format from dd/mm/yyyy to yyyy/mm/dd for numpy datetime64().
+
+    :param str date: date from sheet.
+    :return np.datetime64 day: date in datetime64 format.
+
+    Version 1.0.0
+    """
     date = date.replace("/", "-")
     date = date.split("-")
     date.reverse()
@@ -84,18 +82,18 @@ def date_format_sheet_python(date):
     return np.datetime64(day)
 
 
-""" 
-Create new campaigns also using list comprehension and placing then into numpy array
-
-:param gspread.worksheet sh: spreadsheet to read
-:param str names: the name of the campaign in string
-:param int number: the number of campaigns to make
-:return numpy.ndarray array_of_campaigns : list of campaigns and the people
-
-"""
-
-
 def campaigns(sh, names, number):
+    """
+    Create new campaigns also using list comprehension and placing then into numpy array.
+
+    :param gspread.worksheet sh: spreadsheet to read.
+    :param str names: the name of the campaign in string.
+    :param int number: the number of campaigns to make.
+    :return numpy.ndarray array_of_campaigns : list of campaigns and the people.
+
+    Version 1.0.0
+    """
+
     # Create new campaigns also using list comprehension and placing then into numpy array
     array_of_campaigns = np.array([Campaign(name) for name in names])
     for i in range(number):
@@ -113,15 +111,16 @@ def campaigns(sh, names, number):
     return array_of_campaigns
 
 
-"""
-Set the next date for the next email to be sent in the campaign list
-
-:param Campaign campaign: campaign object that holds the people objects
-:param str next_day: next date for emails to be sent 
-"""
-
-
 def next_email_date(campaign, next_day):
+    """
+    Set the next date for the next email to be sent in the campaign list.
+
+    :param Campaign campaign: campaign object that holds the people objects.
+    :param str next_day: next date for emails to be sent .
+
+    Version 1.0.0
+    """
+
     if "," in next_day:
         day, time = next_day.split(",")
         time = time.strip()
@@ -134,15 +133,17 @@ def next_email_date(campaign, next_day):
             person.set_tracker(person.get_date_joined() + next_day, "")
 
 
-"""
-Set the next email templates for the next email to be sent in the campaign list
+def finding_duplicates_dates(people: list):
+    """
+    Set the next email templates for the next email to be sent in the campaign list
 
-:param Campaign campaign: campaign object that holds the people objects
-:param str template_id: the id of the next template
-"""
+    :param people: The people list of people to perform the search.
+    :return dict seen: A dictionary in the form of {time: list of people in the same time frame}
+    :return list duplicates: The list of duplicates.
 
+    Version 1.0.0
+    """
 
-def finding_duplicates_dates(people):
     dates = [person.get_tracker() for person in people]
     seen = {}
     duplicates = []
@@ -158,22 +159,20 @@ def finding_duplicates_dates(people):
     return seen, duplicates
 
 
-""" 
-Send emails based on the given parameters 
-
-:param list email_batches: list of different email batches to send at specific times
-
-:return
-- currently no returns but prints the response
-
-# TODO
-    - Add to log
-    - Check next date to be sent
-    - Update the google sheet
-"""
-
-
 def send_email(emails, sh):
+    """
+    Send emails based on the given parameters
+
+    :param list emails: list of different email batches to send at specific times
+    :param spread_sheet_object sh: The spread sheet object used to read the sheet.
+
+    Version 1.0.0
+
+    # TODO
+        - Add to log
+        - Check next date to be sent
+        - Update the google sheet
+    """
     # This function should stop by the end of the day
 
     # sort time to send just in case they are not in order
@@ -247,8 +246,8 @@ def send_email(emails, sh):
 
                 request = (
                     service.spreadsheets()
-                    .values()
-                    .append(
+                        .values()
+                        .append(
                         spreadsheetId=spreadsheet_id,
                         range=range_,
                         valueInputOption=value_input_option,
@@ -277,15 +276,15 @@ def send_email(emails, sh):
             pass
 
 
-"""
-# TODO
-
-- Add a way to check when the next email is to be sent and if it is empty then send them the welcome email
-- Add a way to write data to log as soon as emails are sent
-"""
-
-
 async def main():
+    """
+    This is the main drip function and it builds the email batches to be sent to send_email().
+    Initially read the data, check for next dates, set up objects for each person, then each campaign.
+    Lastly, checks the next date data and create the email batches.
+
+    Version 1.0.0
+    """
+
     while True:
         # Start the main function at the start of the day 00:00:00 at Perth time
         timezone = pytz.timezone(os.getenv("timezone"))
@@ -340,9 +339,9 @@ async def main():
                             time_to_send = np.datetime64("today", "D") + np.timedelta64(10, "h")
                         else:
                             time_to_send = (
-                                list_of_emails[seen[key][0]].get_date_joined()
-                                + np.timedelta64(campaign_array[campaign_date_col][1], "D")
-                                + np.timedelta64(10, "h")
+                                    list_of_emails[seen[key][0]].get_date_joined()
+                                    + np.timedelta64(campaign_array[campaign_date_col][1], "D")
+                                    + np.timedelta64(10, "h")
                             )
                         email_from = campaign_metadata[2][sender_col]
                         current_batch = Email(email_from, email_to, time_to_send, subject, chosen_template, campaign)
@@ -357,11 +356,11 @@ async def main():
                         # Assuming day difference will always be positive else it will give an error
                         day_difference = (
                             (
-                                np.datetime64(key, "D")
-                                - np.datetime64(list_of_emails[seen[key][0]].get_date_joined(), "D")
+                                    np.datetime64(key, "D")
+                                    - np.datetime64(list_of_emails[seen[key][0]].get_date_joined(), "D")
                             )
-                            .astype(str)[:-4]
-                            .strip()
+                                .astype(str)[:-4]
+                                .strip()
                         )
                         time = int(list_of_emails[seen[key][0]].get_tracker().astype(str)[11:13])
 
