@@ -1,5 +1,8 @@
 gspread~=4.0.0
-sendgrid~=6.8.1
 numpy~=1.21.2
-python-dotenv~=0.15.0
 pytz~=2020.5
+python-dotenv~=0.15.0
+sendgrid~=6.8.1
+google-api-python-client
+google-auth-httplib2
+google-auth-oauthlib
