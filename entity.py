@@ -14,7 +14,7 @@ class People:
         """
         Constructor method to create each person.
 
-        :param date_joined: The date each person joins the drip system.
+        :param date_joined: The date each person joins the drip system in the format of dd/mm/yyyy.
         :param email: The email of each person.
         :param first_name: The first name of the person.
         :param last_name: The last name of the person.
@@ -89,6 +89,7 @@ class People:
     def get_tracker(self):
         """
         Get person`s tracker to check the next date to send email.
+        It will return None if no tracker is set.
 
         :return str email_tracker: The next date for email to be sent.
         """
@@ -97,29 +98,37 @@ class People:
     def read_tracker(self, date: str):
         """
         Set the person`s tracker from google sheet if already placed after welcome.
+        Must be in the format of yyyy-mm-dd else it will return an error message.
+        If the date is empty from google sheet it will also be an empty string.
 
-        :param date: The date in the string format yyyy/mm/dd.
+        :param date: The date in the string format yyyy-mm-dd.
         """
 
         if date != "":
-            self.email_tracker = np.datetime64(date)
+            if len(date.split('-')[0]) == 4:
+                self.email_tracker = np.datetime64(date)
+            else:
+                return 'Incorrect date format, must be yyyy-mm-dd!'
         else:
             self.email_tracker = date
 
-    def set_tracker(self, date: str, time: str):
+    def set_tracker(self, date, time: str):
         """
         Set person`s tracker from main drip function to google sheet and convert from using am/pm to 24hr time.
 
-        :param date: The date added in the format of yyyy/mm/dd.
+        :param numpy.datetime64 date: The date added in the format of yyyy-mm-dd.
         :param time: The time for each person in the format of 10am/pm.
         """
-        if time == "":
-            self.email_tracker = date + np.timedelta64(10, "h")
-        else:
-            if "am" in time:
-                self.email_tracker = date + np.timedelta64(int(time[:2]), "h")
+        if date != '':
+            if time == "":
+                self.email_tracker = date + np.timedelta64(10, "h")
             else:
-                self.email_tracker = date + np.timedelta64(int(time[:1]) + 12, "h")
+                if "am" in time:
+                    self.email_tracker = date + np.timedelta64(int(time[:2]), "h")
+                else:
+                    self.email_tracker = date + np.timedelta64(int(time[:1]) + 12, "h")
+        else:
+            return 'Missing date input!'
 
 
 class Campaign:
@@ -251,9 +260,9 @@ class Email:
 
     def get_campaign(self):
         """
-        Get the campaign name.
+        Get the campaign object of the people in the email.
 
-        :return str campaign: The campaign`s name.
+        :return str campaign: The campaign`s object.
         """
         return self.campaign
 

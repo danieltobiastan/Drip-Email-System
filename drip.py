@@ -63,7 +63,7 @@ def template(template_data: str):
 
 def date_format_sheet_python(date):
     """
-    Convert the date format from dd/mm/yyyy to yyyy/mm/dd for numpy datetime64().
+    Convert the date format from dd/mm/yyyy to yyyy-mm-dd for numpy datetime64().
 
     :param str date: date from sheet.
     :return np.datetime64 day: date in datetime64 format.
@@ -169,7 +169,6 @@ def send_email(emails, sh):
     Version 1.0.0
 
     # TODO
-        - Add to log
         - Check next date to be sent
         - Update the google sheet
     """

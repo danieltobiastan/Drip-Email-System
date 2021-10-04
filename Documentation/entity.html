@@ -142,7 +142,7 @@ entity    </h1>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor method to create each person.</span>
 
-<span class="sd">        :param date_joined: The date each person joins the drip system.</span>
+<span class="sd">        :param date_joined: The date each person joins the drip system in the format of dd/mm/yyyy.</span>
 <span class="sd">        :param email: The email of each person.</span>
 <span class="sd">        :param first_name: The first name of the person.</span>
 <span class="sd">        :param last_name: The last name of the person.</span>
@@ -217,6 +217,7 @@ entity    </h1>
     <span class="k">def</span> <span class="nf">get_tracker</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get person`s tracker to check the next date to send email.</span>
+<span class="sd">        It will return None if no tracker is set.</span>
 
 <span class="sd">        :return str email_tracker: The next date for email to be sent.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -225,29 +226,37 @@ entity    </h1>
     <span class="k">def</span> <span class="nf">read_tracker</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">date</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set the person`s tracker from google sheet if already placed after welcome.</span>
+<span class="sd">        Must be in the format of yyyy-mm-dd else it will return an error message.</span>
+<span class="sd">        If the date is empty from google sheet it will also be an empty string.</span>
 
-<span class="sd">        :param date: The date in the string format yyyy/mm/dd.</span>
+<span class="sd">        :param date: The date in the string format yyyy-mm-dd.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">date</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">email_tracker</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">datetime64</span><span class="p">(</span><span class="n">date</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">date</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">email_tracker</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">datetime64</span><span class="p">(</span><span class="n">date</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="s1">&#39;Incorrect date format, must be yyyy-mm-dd!&#39;</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">email_tracker</span> <span class="o">=</span> <span class="n">date</span>
 
-    <span class="k">def</span> <span class="nf">set_tracker</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">date</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">set_tracker</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">date</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set person`s tracker from main drip function to google sheet and convert from using am/pm to 24hr time.</span>
 
-<span class="sd">        :param date: The date added in the format of yyyy/mm/dd.</span>
+<span class="sd">        :param numpy.datetime64 date: The date added in the format of yyyy-mm-dd.</span>
 <span class="sd">        :param time: The time for each person in the format of 10am/pm.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">time</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">email_tracker</span> <span class="o">=</span> <span class="n">date</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">timedelta64</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;h&quot;</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="s2">&quot;am&quot;</span> <span class="ow">in</span> <span class="n">time</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">email_tracker</span> <span class="o">=</span> <span class="n">date</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">timedelta64</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">[:</span><span class="mi">2</span><span class="p">]),</span> <span class="s2">&quot;h&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">date</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">time</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">email_tracker</span> <span class="o">=</span> <span class="n">date</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">timedelta64</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;h&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">email_tracker</span> <span class="o">=</span> <span class="n">date</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">timedelta64</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">[:</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="mi">12</span><span class="p">,</span> <span class="s2">&quot;h&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="s2">&quot;am&quot;</span> <span class="ow">in</span> <span class="n">time</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">email_tracker</span> <span class="o">=</span> <span class="n">date</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">timedelta64</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">[:</span><span class="mi">2</span><span class="p">]),</span> <span class="s2">&quot;h&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">email_tracker</span> <span class="o">=</span> <span class="n">date</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">timedelta64</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">[:</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="mi">12</span><span class="p">,</span> <span class="s2">&quot;h&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s1">&#39;Missing date input!&#39;</span>
 
 
 <span class="k">class</span> <span class="nc">Campaign</span><span class="p">:</span>
@@ -379,9 +388,9 @@ entity    </h1>
 
     <span class="k">def</span> <span class="nf">get_campaign</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get the campaign name.</span>
+<span class="sd">        Get the campaign object of the people in the email.</span>
 
-<span class="sd">        :return str campaign: The campaign`s name.</span>
+<span class="sd">        :return str campaign: The campaign`s object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">campaign</span>
 
@@ -445,7 +454,7 @@ entity    </h1>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor method to create each person.</span>
 
-<span class="sd">        :param date_joined: The date each person joins the drip system.</span>
+<span class="sd">        :param date_joined: The date each person joins the drip system in the format of dd/mm/yyyy.</span>
 <span class="sd">        :param email: The email of each person.</span>
 <span class="sd">        :param first_name: The first name of the person.</span>
 <span class="sd">        :param last_name: The last name of the person.</span>
@@ -520,6 +529,7 @@ entity    </h1>
     <span class="k">def</span> <span class="nf">get_tracker</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get person`s tracker to check the next date to send email.</span>
+<span class="sd">        It will return None if no tracker is set.</span>
 
 <span class="sd">        :return str email_tracker: The next date for email to be sent.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -528,29 +538,37 @@ entity    </h1>
     <span class="k">def</span> <span class="nf">read_tracker</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">date</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set the person`s tracker from google sheet if already placed after welcome.</span>
+<span class="sd">        Must be in the format of yyyy-mm-dd else it will return an error message.</span>
+<span class="sd">        If the date is empty from google sheet it will also be an empty string.</span>
 
-<span class="sd">        :param date: The date in the string format yyyy/mm/dd.</span>
+<span class="sd">        :param date: The date in the string format yyyy-mm-dd.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">date</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">email_tracker</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">datetime64</span><span class="p">(</span><span class="n">date</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">date</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">email_tracker</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">datetime64</span><span class="p">(</span><span class="n">date</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="s1">&#39;Incorrect date format, must be yyyy-mm-dd!&#39;</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">email_tracker</span> <span class="o">=</span> <span class="n">date</span>
 
-    <span class="k">def</span> <span class="nf">set_tracker</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">date</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">set_tracker</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">date</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set person`s tracker from main drip function to google sheet and convert from using am/pm to 24hr time.</span>
 
-<span class="sd">        :param date: The date added in the format of yyyy/mm/dd.</span>
+<span class="sd">        :param numpy.datetime64 date: The date added in the format of yyyy-mm-dd.</span>
 <span class="sd">        :param time: The time for each person in the format of 10am/pm.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">time</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">email_tracker</span> <span class="o">=</span> <span class="n">date</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">timedelta64</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;h&quot;</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="s2">&quot;am&quot;</span> <span class="ow">in</span> <span class="n">time</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">email_tracker</span> <span class="o">=</span> <span class="n">date</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">timedelta64</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">[:</span><span class="mi">2</span><span class="p">]),</span> <span class="s2">&quot;h&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">date</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">time</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">email_tracker</span> <span class="o">=</span> <span class="n">date</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">timedelta64</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;h&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">email_tracker</span> <span class="o">=</span> <span class="n">date</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">timedelta64</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">[:</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="mi">12</span><span class="p">,</span> <span class="s2">&quot;h&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="s2">&quot;am&quot;</span> <span class="ow">in</span> <span class="n">time</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">email_tracker</span> <span class="o">=</span> <span class="n">date</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">timedelta64</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">[:</span><span class="mi">2</span><span class="p">]),</span> <span class="s2">&quot;h&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">email_tracker</span> <span class="o">=</span> <span class="n">date</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">timedelta64</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">[:</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="mi">12</span><span class="p">,</span> <span class="s2">&quot;h&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s1">&#39;Missing date input!&#39;</span>
 </pre></div>
 
         </details>
@@ -584,7 +602,7 @@ entity    </h1>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor method to create each person.</span>
 
-<span class="sd">        :param date_joined: The date each person joins the drip system.</span>
+<span class="sd">        :param date_joined: The date each person joins the drip system in the format of dd/mm/yyyy.</span>
 <span class="sd">        :param email: The email of each person.</span>
 <span class="sd">        :param first_name: The first name of the person.</span>
 <span class="sd">        :param last_name: The last name of the person.</span>
@@ -608,7 +626,7 @@ entity    </h1>
 
             <div class="docstring"><p>Constructor method to create each person.</p>
 
-<p>:param date_joined: The date each person joins the drip system.
+<p>:param date_joined: The date each person joins the drip system in the format of dd/mm/yyyy.
 :param email: The email of each person.
 :param first_name: The first name of the person.
 :param last_name: The last name of the person.
@@ -805,6 +823,7 @@ entity    </h1>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">get_tracker</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get person`s tracker to check the next date to send email.</span>
+<span class="sd">        It will return None if no tracker is set.</span>
 
 <span class="sd">        :return str email_tracker: The next date for email to be sent.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -813,7 +832,8 @@ entity    </h1>
 
         </details>
 
-            <div class="docstring"><p>Get person`s tracker to check the next date to send email.</p>
+            <div class="docstring"><p>Get person`s tracker to check the next date to send email.
+It will return None if no tracker is set.</p>
 
 <p>:return str email_tracker: The next date for email to be sent.</p>
 </div>
@@ -833,21 +853,28 @@ entity    </h1>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">read_tracker</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">date</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set the person`s tracker from google sheet if already placed after welcome.</span>
+<span class="sd">        Must be in the format of yyyy-mm-dd else it will return an error message.</span>
+<span class="sd">        If the date is empty from google sheet it will also be an empty string.</span>
 
-<span class="sd">        :param date: The date in the string format yyyy/mm/dd.</span>
+<span class="sd">        :param date: The date in the string format yyyy-mm-dd.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">date</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">email_tracker</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">datetime64</span><span class="p">(</span><span class="n">date</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">date</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">email_tracker</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">datetime64</span><span class="p">(</span><span class="n">date</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="s1">&#39;Incorrect date format, must be yyyy-mm-dd!&#39;</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">email_tracker</span> <span class="o">=</span> <span class="n">date</span>
 </pre></div>
 
         </details>
 
-            <div class="docstring"><p>Set the person`s tracker from google sheet if already placed after welcome.</p>
+            <div class="docstring"><p>Set the person`s tracker from google sheet if already placed after welcome.
+Must be in the format of yyyy-mm-dd else it will return an error message.
+If the date is empty from google sheet it will also be an empty string.</p>
 
-<p>:param date: The date in the string format yyyy/mm/dd.</p>
+<p>:param date: The date in the string format yyyy-mm-dd.</p>
 </div>
 
 
@@ -857,32 +884,35 @@ entity    </h1>
 
         
             <span class="def">def</span>
-            <span class="name">set_tracker</span><span class="signature">(self, date: str, time: str)</span>:
+            <span class="name">set_tracker</span><span class="signature">(self, date, time: str)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">set_tracker</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">date</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">set_tracker</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">date</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set person`s tracker from main drip function to google sheet and convert from using am/pm to 24hr time.</span>
 
-<span class="sd">        :param date: The date added in the format of yyyy/mm/dd.</span>
+<span class="sd">        :param numpy.datetime64 date: The date added in the format of yyyy-mm-dd.</span>
 <span class="sd">        :param time: The time for each person in the format of 10am/pm.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">time</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">email_tracker</span> <span class="o">=</span> <span class="n">date</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">timedelta64</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;h&quot;</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="s2">&quot;am&quot;</span> <span class="ow">in</span> <span class="n">time</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">email_tracker</span> <span class="o">=</span> <span class="n">date</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">timedelta64</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">[:</span><span class="mi">2</span><span class="p">]),</span> <span class="s2">&quot;h&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">date</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">time</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">email_tracker</span> <span class="o">=</span> <span class="n">date</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">timedelta64</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;h&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">email_tracker</span> <span class="o">=</span> <span class="n">date</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">timedelta64</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">[:</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="mi">12</span><span class="p">,</span> <span class="s2">&quot;h&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="s2">&quot;am&quot;</span> <span class="ow">in</span> <span class="n">time</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">email_tracker</span> <span class="o">=</span> <span class="n">date</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">timedelta64</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">[:</span><span class="mi">2</span><span class="p">]),</span> <span class="s2">&quot;h&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">email_tracker</span> <span class="o">=</span> <span class="n">date</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">timedelta64</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">[:</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="mi">12</span><span class="p">,</span> <span class="s2">&quot;h&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s1">&#39;Missing date input!&#39;</span>
 </pre></div>
 
         </details>
 
             <div class="docstring"><p>Set person`s tracker from main drip function to google sheet and convert from using am/pm to 24hr time.</p>
 
-<p>:param date: The date added in the format of yyyy/mm/dd.
+<p>:param numpy.datetime64 date: The date added in the format of yyyy-mm-dd.
 :param time: The time for each person in the format of 10am/pm.</p>
 </div>
 
@@ -1200,9 +1230,9 @@ entity    </h1>
 
     <span class="k">def</span> <span class="nf">get_campaign</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get the campaign name.</span>
+<span class="sd">        Get the campaign object of the people in the email.</span>
 
-<span class="sd">        :return str campaign: The campaign`s name.</span>
+<span class="sd">        :return str campaign: The campaign`s object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">campaign</span>
 </pre></div>
@@ -1418,18 +1448,18 @@ entity    </h1>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">get_campaign</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get the campaign name.</span>
+<span class="sd">        Get the campaign object of the people in the email.</span>
 
-<span class="sd">        :return str campaign: The campaign`s name.</span>
+<span class="sd">        :return str campaign: The campaign`s object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">campaign</span>
 </pre></div>
 
         </details>
 
-            <div class="docstring"><p>Get the campaign name.</p>
+            <div class="docstring"><p>Get the campaign object of the people in the email.</p>
 
-<p>:return str campaign: The campaign`s name.</p>
+<p>:return str campaign: The campaign`s object.</p>
 </div>
 
 
